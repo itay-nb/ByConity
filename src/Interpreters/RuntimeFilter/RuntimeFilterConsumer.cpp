@@ -140,7 +140,7 @@ void RuntimeFilterConsumer::bypass(RuntimeFilterId id, bool is_local, BypassType
             DynamicData data;
             data.is_local = true;
             data.bypass = type;
-            RuntimeFilterManager::getInstance().addDynamicValue(query_id, id, std::move(data), 1);
+            RuntimeFilterManager::getInstance().addDynamicValue(query_id, id, std::move(data), 1); // ITAY dynamic filter set the dynamic filter value to bypass (practically cancelling it)
         }
         else
         {

@@ -975,7 +975,7 @@ bool TableScanStep::rewriteDynamicFilterIntoPrewhere(ASTSelectQuery * query)
 
         for (size_t i = 0; i < filters.first.size(); ++i)
         {
-            if (ASTEquality::compareTree(descriptions[i].expr, it->expr) && storage->supportsPrewhere())
+            if (ASTEquality::compareTree(descriptions[i].expr, it->expr) && storage->supportsPrewhere()) // ITAY dynamic filter add also to prewhere the most efficient dynamic filter
             {
                 prewhere_predicates.emplace_back(filters.first[i]);
                 continue;
@@ -1067,7 +1067,7 @@ void TableScanStep::initializePipeline(QueryPipeline & pipeline, const BuildQuer
 
     rewriteInForBucketTable(build_context.context);
     stage_watch.start();
-    bool need_rw = rewriteDynamicFilterIntoPrewhere(query);
+    bool need_rw = rewriteDynamicFilterIntoPrewhere(query); // ITAY dynamic filter execution flow STARTS HERE
     if (need_rw)
     {
         const auto & setting = build_context.context->getSettingsRef();
@@ -1654,7 +1654,7 @@ ASTPtr TableScanStep::rewriteRuntimeFilter(
     for (auto & runtime_filter : filters.first)
     {
         auto description = RuntimeFilterUtils::extractDescription(runtime_filter).value();
-        auto runtime_filters = RuntimeFilterUtils::createRuntimeFilterForTableScan(description, query_id, wait_ms, enable_bf, range_cover);
+        auto runtime_filters = RuntimeFilterUtils::createRuntimeFilterForTableScan(description, query_id, wait_ms, enable_bf, range_cover); // ITAY dynamic filter replace placeholder with values
         predicates.insert(predicates.end(), runtime_filters.begin(), runtime_filters.end());
     }
 

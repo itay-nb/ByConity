@@ -59,8 +59,8 @@ namespace JSONBuilder
     using ItemPtr = std::unique_ptr<IItem>;
 }
 
-/// A tree of query steps.
-/// The goal of QueryPlan is to build QueryPipeline.
+/// A tree of query steps. 					ITAY dynamic filter
+/// The goal of QueryPlan is to build QueryPipeline. 		ITAY dynamic filter
 /// QueryPlan let delay pipeline creation which is helpful for pipeline-level optimizations.
 class QueryPlan
 {

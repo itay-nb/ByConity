@@ -45,7 +45,7 @@ namespace ErrorCodes
 }
 
 
-MergeTreeBaseSelectProcessor::MergeTreeBaseSelectProcessor(
+MergeTreeBaseSelectProcessor::MergeTreeBaseSelectProcessor( // ITAY contains a single part in the derived class Storages/MergeTree/MergeTreeSelectProcessor.cpp
     Block header,
     const MergeTreeMetaBase & storage_,
     const StorageMetadataPtr & metadata_snapshot_,
@@ -94,11 +94,11 @@ MergeTreeBaseSelectProcessor::MergeTreeBaseSelectProcessor(
 }
 
 
-Chunk MergeTreeBaseSelectProcessor::generate()
+Chunk MergeTreeBaseSelectProcessor::generate() // ITAY START probably called repeatedly to produce data
 {
     while (!isCancelled())
     {
-        if ((!task || task->isFinished()) && !getNewTask())
+        if ((!task || task->isFinished()) && !getNewTask()) // ITAY call getNewTask() repeatedly
             return {};
 
         auto res = readFromPart();

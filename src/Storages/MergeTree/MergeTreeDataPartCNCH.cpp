@@ -91,7 +91,7 @@ MergeTreeDataPartCNCH::MergeTreeDataPartCNCH(
     const String & name_,
     const MergeTreePartInfo & info_,
     const VolumePtr & volume_,
-    const std::optional<String> & relative_path_,
+    const std::optional<String> & relative_path_, // ITAY MergeTreeDataPartCNCH is a single part file
     const IMergeTreeDataPart * parent_part_,
     const UUID & part_id_)
     : IMergeTreeDataPart(
@@ -113,7 +113,7 @@ IMergeTreeDataPart::MergeTreeReaderPtr MergeTreeDataPartCNCH::getReader(
     new_settings.convert_nested_to_subcolumns = true;
 
     auto ptr = std::static_pointer_cast<const MergeTreeDataPartCNCH>(shared_from_this());
-    return std::make_unique<MergeTreeReaderCNCH>(
+    return std::make_unique<MergeTreeReaderCNCH>( // ITAY all starts here
         ptr,
         columns_to_read,
         metadata_snapshot,

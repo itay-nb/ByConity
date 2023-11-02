@@ -192,11 +192,11 @@ std::unique_ptr<IInterpreter> InterpreterFactory::get(ASTPtr & query, ContextMut
     if (query->as<ASTSelectQuery>())
     {
         if (QueryUseOptimizerChecker::check(query, context)) {
-            return std::make_unique<InterpreterSelectQueryUseOptimizer>(query, context, options);
+            return std::make_unique<InterpreterSelectQueryUseOptimizer>(query, context, options); // ITAY path0 query flow - storage is null
         }
         /// This is internal part of ASTSelectWithUnionQuery.
         /// Even if there is SELECT without union, it is represented by ASTSelectWithUnionQuery with single ASTSelectQuery as a child.
-        return std::make_unique<InterpreterSelectQuery>(query, context, options);
+        return std::make_unique<InterpreterSelectQuery>(query, context, options); // ITAY path1 query flow - storage is null
     }
     else if (query->as<ASTSelectWithUnionQuery>())
     {

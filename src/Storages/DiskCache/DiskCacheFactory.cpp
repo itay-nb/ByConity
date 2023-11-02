@@ -59,7 +59,7 @@ void DiskCacheFactory::init(Context & context)
     if (caches.find(DiskCacheType::MergeTree) == caches.end())
     {
         LOG_TRACE(log,fmt::format("Creating DiskCache of {} kind by setting: {}",diskCacheTypeToString(DiskCacheType::MergeTree),cache_settings.toString()));
-        auto disk_cache = std::make_shared<DiskCacheLRU>(disk_cache_volume, throttler, cache_settings);
+        auto disk_cache = std::make_shared<DiskCacheLRU>(disk_cache_volume, throttler, cache_settings); // ITAY standard cache is DiskCacheLRU
         caches.emplace(DiskCacheType::MergeTree, disk_cache);
     }
 }

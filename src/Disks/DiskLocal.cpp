@@ -107,6 +107,7 @@ private:
     fs::directory_iterator entry;
 };
 
+// ITAY DiskLocal is the trivial implementatiobn of DiskDecorator using fs/syscalls
 UInt64 DiskLocal::getID() const
 {
     return static_cast<UInt64>(std::hash<String>{}(DiskType::toString(getType())) ^ std::hash<String>{}(getPath()));

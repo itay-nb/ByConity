@@ -181,7 +181,7 @@ DiskCacheWrapper::readFile(
 }
 
 std::unique_ptr<WriteBufferFromFileBase>
-DiskCacheWrapper::writeFile(const String & path, const WriteSettings& settings)
+DiskCacheWrapper::writeFile(const String & path, const WriteSettings& settings) // ITAY cache segment write path
 {
     if (!cache_file_predicate(path))
         return DiskDecorator::writeFile(path, settings);
@@ -198,7 +198,7 @@ DiskCacheWrapper::writeFile(const String & path, const WriteSettings& settings)
         {
             /// Copy file from cache to actual disk when cached buffer is finalized.
             auto src_buffer = cache_disk->readFile(path, {.buffer_size = settings.buffer_size});
-            auto dst_buffer = DiskDecorator::writeFile(path, settings);
+            auto dst_buffer = DiskDecorator::writeFile(path, settings); // ITAY DiskDecorator is used for file ops
             copyData(*src_buffer, *dst_buffer);
             dst_buffer->finalize();
         });

@@ -237,7 +237,7 @@ const Rewriters & PlanOptimizer::getFullRewriters()
         // remove not inlined CTEs
         std::make_shared<RemoveUnusedCTE>(),
 
-        // add runtime filters
+        // add runtime filters // ITAY path0 query flow // ITAY dynamic filter planning flow STARTS HERE
         std::make_shared<AddRuntimeFilters>(),
 
         // final UnifyNullableType, make sure type is correct.
@@ -254,7 +254,7 @@ const Rewriters & PlanOptimizer::getFullRewriters()
         std::make_shared<SortingOrderedSource>(),
 
         std::make_shared<OptimizeTrivialCount>(),
-        // push predicate into storage
+        // push predicate into storage // ITAY dynamic filter - filter placeholder is pushed into TableScan
         std::make_shared<IterativeRewriter>(Rules::pushIntoTableScanRules(), "PushIntoTableScan"),
         // TODO cost-based projection push down
         std::make_shared<AddBufferForDeadlockCTE>(),
@@ -266,7 +266,7 @@ const Rewriters & PlanOptimizer::getFullRewriters()
     return full_rewrites;
 }
 
-void PlanOptimizer::optimize(QueryPlan & plan, ContextMutablePtr context)
+void PlanOptimizer::optimize(QueryPlan & plan, ContextMutablePtr context) // ITAY path0 query flow
 {
     int i = GraphvizPrinter::PRINT_PLAN_OPTIMIZE_INDEX;
     GraphvizPrinter::printLogicalPlan(plan, context, std::to_string(i++) + "_Init_Plan");
@@ -279,11 +279,11 @@ void PlanOptimizer::optimize(QueryPlan & plan, ContextMutablePtr context)
 
     if (PlanPattern::isSimpleQuery(plan))
     {
-        optimize(plan, context, getSimpleRewriters());
+        optimize(plan, context, getSimpleRewriters()); // ITAY join-less queries
     }
     else
     {
-        optimize(plan, context, getFullRewriters());
+        optimize(plan, context, getFullRewriters()); // ITAY path0 query flow
     }
 
     // Check final plan to satisfy with :

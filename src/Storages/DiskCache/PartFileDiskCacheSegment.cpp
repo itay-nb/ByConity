@@ -132,9 +132,9 @@ void PartFileDiskCacheSegment::cacheToDisk(IDiskCache & disk_cache, bool throw_e
         /// cache data segment
         if (!preload_level || (preload_level & PreloadLevelSettings::DataPreload) == PreloadLevelSettings::DataPreload)
         {
-            data_file->seek(stream_file_pos.file_offset + cache_data_left_offset);
+            data_file->seek(stream_file_pos.file_offset + cache_data_left_offset);  // ITAY seek the source buffer to the proper offset
             LimitReadBuffer segment_value(*data_file, cache_data_bytes, false);
-            disk_cache.set(getSegmentName(), segment_value, cache_data_bytes);
+            disk_cache.set(getSegmentName(), segment_value, cache_data_bytes); // ITAY DiskCacheLRU writes to disk and mark as cached
             LOG_TRACE(disk_cache.getLogger(), "cached data file: {}, preload_level: {}", getSegmentName(), preload_level);
         }
 

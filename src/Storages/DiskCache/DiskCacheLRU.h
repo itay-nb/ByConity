@@ -58,7 +58,7 @@ struct DiskCacheWeightFunction
 };
 
 //            ┌───────┐            ┌──────┐        ┌────────┐               ┌────┐
-// CacheState │Caching├───────────►│Cached├───────►│Deleting├──────────────►│Gone│
+// CacheState │Caching├───────────►│Cached├───────►│Deleting├──────────────►│Gone│ // ITAY should we add a status 'SpuOptimized'?
 //            └──┬────┘            └──────┘        └───┬────┘               └────┘
 //               │                     ▲               │                       ▲
 // FileState     └───►Temp────►Final───┘               └───►Final────►Deleted──┘

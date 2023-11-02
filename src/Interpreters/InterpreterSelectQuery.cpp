@@ -620,7 +620,7 @@ InterpreterSelectQuery::InterpreterSelectQuery(
     sanitizeBlock(result_header, true);
 }
 
-void InterpreterSelectQuery::buildQueryPlan(QueryPlan & query_plan)
+void InterpreterSelectQuery::buildQueryPlan(QueryPlan & query_plan) // ITAY path1 query flow
 {
     std::shared_ptr<InterpreterPerfectShard> interpreter_perfect_shard
         = context->getSettingsRef().distributed_perfect_shard ? std::make_shared<InterpreterPerfectShard>(*this) : nullptr;
@@ -630,7 +630,7 @@ void InterpreterSelectQuery::buildQueryPlan(QueryPlan & query_plan)
         interpreter_perfect_shard->buildQueryPlan(query_plan);
     }
     else
-        executeImpl(query_plan, input, std::move(input_pipe));
+        executeImpl(query_plan, input, std::move(input_pipe)); // ITAY path1 query flow - just adds steps
 
     /// We must guarantee that result structure is the same as in getSampleBlock()
     ///
@@ -683,9 +683,9 @@ BlockIO InterpreterSelectQuery::execute()
     BlockIO res;
     QueryPlan query_plan;
 
-    buildQueryPlan(query_plan);
+    buildQueryPlan(query_plan); // ITAY path1 query flow - add steps to query plan (same file)
 
-    res.pipeline = std::move(*query_plan.buildQueryPipeline(
+    res.pipeline = std::move(*query_plan.buildQueryPipeline( // ITAY path1 query flow
         QueryPlanOptimizationSettings::fromContext(context), BuildQueryPipelineSettings::fromContext(context)));
 
     res.pipeline.addUsedStorageIDs(getUsedStorageIDs());
@@ -1005,7 +1005,7 @@ static bool hasWithTotalsInAnySubqueryInFromClause(const ASTSelectQuery & query)
 }
 
 
-void InterpreterSelectQuery::executeImpl(QueryPlan & query_plan, const BlockInputStreamPtr & prepared_input, std::optional<Pipe> prepared_pipe)
+void InterpreterSelectQuery::executeImpl(QueryPlan & query_plan, const BlockInputStreamPtr & prepared_input, std::optional<Pipe> prepared_pipe) // ITAY path1 query flow
 {
     /** Streams of data. When the query is executed in parallel, we have several data streams.
      *  If there is no GROUP BY, then perform all operations before ORDER BY and LIMIT in parallel, then
@@ -1120,7 +1120,7 @@ void InterpreterSelectQuery::executeImpl(QueryPlan & query_plan, const BlockInpu
             to_aggregation_stage = true;
 
         /// Read the data from Storage. from_stage - to what stage the request was completed in Storage.
-        executeFetchColumns(from_stage, query_plan);
+        executeFetchColumns(from_stage, query_plan); // ITAY path1 query flow - does nothing
 
         LOG_TRACE(log, "{} -> {}", QueryProcessingStage::toString(from_stage), QueryProcessingStage::toString(options.to_stage));
     }
@@ -1871,7 +1871,7 @@ void InterpreterSelectQuery::addPrewhereAliasActions()
     }
 }
 
-void InterpreterSelectQuery::executeFetchColumns(QueryProcessingStage::Enum processing_stage, QueryPlan & query_plan)
+void InterpreterSelectQuery::executeFetchColumns(QueryProcessingStage::Enum processing_stage, QueryPlan & query_plan) // ITAY path1 query flow
 {
     auto & query = getSelectQuery();
     const Settings & settings = context->getSettingsRef();
@@ -2012,7 +2012,7 @@ void InterpreterSelectQuery::executeFetchColumns(QueryProcessingStage::Enum proc
         throw Exception("Setting 'max_block_size' cannot be zero", ErrorCodes::PARAMETER_OUT_OF_BOUND);
 
     /// Initialize the initial data streams to which the query transforms are superimposed. Table or subquery or prepared input?
-    if (query_plan.isInitialized())
+    if (query_plan.isInitialized()) // ITAY path1 query flow - plan already contain steps
     {
         /// Prepared input.
     }

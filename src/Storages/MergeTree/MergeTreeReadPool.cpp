@@ -62,7 +62,7 @@ MergeTreeReadPool::MergeTreeReadPool(
     , prewhere_info{prewhere_info_}
     , parts_ranges{std::move(parts_)}
 {
-    /// parts don't contain duplicate MergeTreeDataPart's.
+    /// parts don't contain duplicate MergeTreeDataPart's. // ITAY
     const auto per_part_sum_marks = fillPerPartInfo(parts_ranges, delete_bitmap_getter_, check_columns_);
     fillPerThreadInfo(threads_, sum_marks_, per_part_sum_marks, parts_ranges, min_marks_for_concurrent_read_);
 }
@@ -241,7 +241,7 @@ std::vector<size_t> MergeTreeReadPool::fillPerPartInfo(
 
     for (const auto i : collections::range(0, parts.size()))
     {
-        const auto & part = parts[i];
+        const auto & part = parts[i]; // ITAY each part appears not more than once in parts
 
         /// Read marks for every data part.
         size_t sum_marks = 0;
@@ -295,7 +295,7 @@ void MergeTreeReadPool::fillPerThreadInfo(
     std::queue<PartsInfo> parts_queue;
 
     {
-        /// Group parts by disk name.
+        /// Group parts by disk name. // ITAY
         /// We try minimize the number of threads concurrently read from the same disk.
         /// It improves the performance for JBOD architecture.
         std::map<String, std::vector<PartInfo>> parts_per_disk;

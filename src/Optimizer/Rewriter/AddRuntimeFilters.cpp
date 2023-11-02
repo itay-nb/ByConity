@@ -19,7 +19,7 @@ void AddRuntimeFilters::rewrite(QueryPlan & plan, ContextMutablePtr context) con
         rule_watch.restart();
     };
 
-    AddRuntimeFilterRewriter add_runtime_filter_rewriter(context, plan.getCTEInfo());
+    AddRuntimeFilterRewriter add_runtime_filter_rewriter(context, plan.getCTEInfo()); // ITAY dynamic filter - create placeholders FILTERs
     add_runtime_filter_rewriter.rewrite(plan);
 
     print_graphviz("-AddRuntimeFilterRewriter");
@@ -28,7 +28,7 @@ void AddRuntimeFilters::rewrite(QueryPlan & plan, ContextMutablePtr context) con
     UnifyNullableType unify_nullable_type;
     unify_nullable_type.rewritePlan(plan, context);
 
-    // 3.push down predicate with dynamic filter enabled
+    // 3.push down predicate with dynamic filter enabled // ITAY dynamic filter
     PredicatePushdown predicate_push_down;
     predicate_push_down.rewritePlan(plan, context);
 
@@ -86,8 +86,8 @@ PlanNodePtr AddRuntimeFilters::AddRuntimeFilterRewriter::visitJoinNode(JoinNode 
     {
         if (runtime_filter_builders.contains(*right_key))
             continue;
-        auto id = context->nextNodeId(); // generate unique id
-        probes.emplace_back(RuntimeFilterUtils::createRuntimeFilterExpression(id, *left_key));
+        auto id = context->nextNodeId(); // generate unique id ITAY dynamic filter - filter id is generated here
+        probes.emplace_back(RuntimeFilterUtils::createRuntimeFilterExpression(id, *left_key)); // ITAY dynamic filter - create filter placeholder per join key
         runtime_filter_builders.emplace(*right_key, RuntimeFilterBuildInfos{id, RuntimeFilterDistribution::Distributed});
     }
 
@@ -121,7 +121,7 @@ PlanNodePtr AddRuntimeFilters::AddRuntimeFilterRewriter::visitJoinNode(JoinNode 
         PlanNodes{
             PlanNodeBase::createPlanNode(
                 context->nextNodeId(),
-                std::make_shared<FilterStep>(node.getChildren()[0]->getStep()->getOutputStream(), PredicateUtils::combineConjuncts(probes)),
+                std::make_shared<FilterStep>(node.getChildren()[0]->getStep()->getOutputStream(), PredicateUtils::combineConjuncts(probes)), // ITAY dynamic filter - put filter placeholder on join's probe side
                 PlanNodes{left}),
             right},
         node.getStatistics());
@@ -370,7 +370,7 @@ PlanNodePtr AddRuntimeFilters::RemoveUnusedRuntimeFilterProbRewriter::visitFilte
     auto child_stats = CardinalityEstimator::estimate(*node.getChildren()[0], cte_helper.getCTEInfo(), context);
     const auto * filter_step = dynamic_cast<const FilterStep *>(node.getStep().get());
 
-    if (!child_stats || child_stats.value()->getRowCount() < context->getSettingsRef().runtime_filter_min_filter_rows)
+    if (!child_stats || child_stats.value()->getRowCount() < context->getSettingsRef().runtime_filter_min_filter_rows) // ITAY dynamic filter - too few rows -> remove filter
     {
         return PlanNodeBase::createPlanNode(
             node.getId(),
@@ -381,8 +381,8 @@ PlanNodePtr AddRuntimeFilters::RemoveUnusedRuntimeFilterProbRewriter::visitFilte
     }
 
     auto filters = RuntimeFilterUtils::extractRuntimeFilters(filter_step->getFilter());
-    auto predicates = std::move(filters.second);
-    for (auto & runtime_filter : filters.first)
+    auto predicates = std::move(filters.second); // ITAY initialize with only static filters
+    for (auto & runtime_filter : filters.first) // ITAY loop over dynamic filters
     {
         auto description = RuntimeFilterUtils::extractDescription(runtime_filter).value();
         auto filter_id = description.id;
@@ -418,7 +418,7 @@ PlanNodePtr AddRuntimeFilters::RemoveUnusedRuntimeFilterProbRewriter::visitFilte
         }
 
         description.filter_factor = filter_factor;
-        predicates.emplace_back(RuntimeFilterUtils::createRuntimeFilterExpression(description));
+        predicates.emplace_back(RuntimeFilterUtils::createRuntimeFilterExpression(description)); // ITAY dynamic filter - add the dynamic filters that match all criteria - still only filter placeholder
         effective_runtime_filters[build_id].emplace(filter_id);
     }
 

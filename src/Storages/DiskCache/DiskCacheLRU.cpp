@@ -210,13 +210,13 @@ void DiskCacheLRU::set(const String& seg_name, ReadBuffer& value, size_t weight_
     {
         // Avoid reserve as much as possible, since it will acquire a disk level
         // exclusive lock
-        reserved_space = volume->reserve(weight_hint);
+        reserved_space = volume->reserve(weight_hint); // ITAY volume is SingleDiskVolume / in DiskLocal only checks that there's free space for previous reservations plus this one
         if (reserved_space == nullptr) {
             throw Exception("Failed to reserve space", ErrorCodes::BAD_ARGUMENTS);
         }
 
         // Write data to local
-        size_t weight = writeSegment(seg_name, value, reserved_space);
+        size_t weight = writeSegment(seg_name, value, reserved_space); // ITAY write path
 
         // Update meta in lru cache, it must still there, since it should get evicted
         // since it have 0 weight
@@ -261,19 +261,19 @@ std::pair<DiskPtr, String> DiskCacheLRU::get(const String & seg_name)
 size_t DiskCacheLRU::writeSegment(const String& seg_key, ReadBuffer& buffer, ReservationPtr& reservation)
 {
     DiskPtr disk = reservation->getDisk();
-    String cache_rel_path = getRelativePath(hash(seg_key));
+    String cache_rel_path = getRelativePath(hash(seg_key)); // ITAY the cache file name is a hash of its key
     String temp_cache_rel_path = cache_rel_path + ".temp";
 
     try
     {
         // Create parent directory
-        disk->createDirectories(fs::path(cache_rel_path).parent_path());
+        disk->createDirectories(fs::path(cache_rel_path).parent_path()); // ITAY create dir in the cache
 
         // Write into temporary file, by default it will truncate this file
         size_t written_size = 0;
         {
             WriteBufferFromFile to(fs::path(disk->getPath()) / temp_cache_rel_path);
-            copyData(buffer, to, reservation.get());
+            copyData(buffer, to, reservation.get()); // ITAY write data to a temp file
 
             written_size = to.count();
         }

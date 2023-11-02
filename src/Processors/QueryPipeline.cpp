@@ -383,7 +383,7 @@ std::unique_ptr<QueryPipeline> QueryPipeline::joinPipelines(
         if (need_build_runtime_filter)
             finish_counter = std::make_shared<JoiningTransform::FinishCounter>(1);
 
-        auto adding_joined = std::make_shared<FillingRightJoinSideTransform>(right->getHeader(), join, finish_counter);
+        auto adding_joined = std::make_shared<FillingRightJoinSideTransform>(right->getHeader(), join, finish_counter); // ITAY dynamic filter pipeline creation flow STOPS HERE - next thing is FillingRightJoinSideTransform::prepare() to store build side data in join
         InputPort * totals_port = nullptr;
         if (right->hasTotals())
             totals_port = adding_joined->addTotalsPort();

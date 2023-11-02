@@ -2041,7 +2041,7 @@ enum PreloadLevelSettings : UInt64
     M(Bool, enable_local_runtime_filter, true, "Whether enable runtime filter in local mode", 0) \
     M(UInt64, runtime_filter_min_filter_rows, 10000, "Set minimum row to enable runtime filter", 0) \
     M(Float, runtime_filter_min_filter_factor, 0.4, "Set minimum filter factor to enable runtime filter", 0) \
-    M(Bool, enable_range_cover, true, "Whether use range rather than bloom or values set for runtime filter", 0) \
+    M(Bool, enable_range_cover, true, "Whether use range rather than bloom or values set for runtime filter", 0) \ /* // ITAY dynamic filter */ \
     M(Bool, runtime_filter_rewrite_bloom_filter_into_prewhere, true, "Whether enable pushdown runtime filter to prewhere for join", 0) \
     M(UInt64, runtime_filter_bloom_build_threshold, 2048000, "The threshold of right table to build bloom filter", 0) \
     M(UInt64, runtime_filter_in_build_threshold, 1024, "The threshold of right table to build value set filter", 0) \

@@ -29,7 +29,7 @@ namespace DB
 /** Forwards all methods to another disk.
   * Methods can be overridden by descendants.
   */
-class DiskDecorator : public IDisk
+class DiskDecorator : public IDisk // ITAY list of disk/file operations required
 {
 public:
     explicit DiskDecorator(const DiskPtr & delegate_);

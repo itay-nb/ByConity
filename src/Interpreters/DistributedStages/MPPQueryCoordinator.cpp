@@ -180,7 +180,7 @@ MPPQueryCoordinator::MPPQueryCoordinator(
 {
 }
 
-BlockIO MPPQueryCoordinator::execute()
+BlockIO MPPQueryCoordinator::execute() // ITAY phase0 query flow - nothing in here
 {
     state_machine->start();
 

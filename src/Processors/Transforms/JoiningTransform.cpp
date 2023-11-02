@@ -234,7 +234,7 @@ InputPort * FillingRightJoinSideTransform::addTotalsPort()
 
 IProcessor::Status FillingRightJoinSideTransform::prepare()
 {
-    auto & output = outputs.front();
+    auto & output = outputs.front(); // ITAY dynamic filter runtime flow STARTS HERE 
 
     /// Check can output.
     if (output.isFinished())
@@ -299,7 +299,7 @@ IProcessor::Status FillingRightJoinSideTransform::prepare()
 
     if (!build_rf && finish_counter && finish_counter->isLast())
     {
-        build_rf = true;
+        build_rf = true; // ITAY dynamic filter runtime flow - build filter only after last batch built
         return Status::Ready;
     }
 
@@ -311,7 +311,7 @@ void FillingRightJoinSideTransform::work()
 {
     if (build_rf)
     {
-        join->tryBuildRuntimeFilters();
+        join->tryBuildRuntimeFilters(); // ITAY dynamic filter runtime flow - start building filter
         return;
     }
 

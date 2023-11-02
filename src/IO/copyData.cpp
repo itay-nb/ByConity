@@ -21,14 +21,14 @@ void copyDataImpl(ReadBuffer & from, WriteBuffer & to, bool check_bytes, size_t 
     size_t written = 0;
 
     /// If read to the end of the buffer, eof() either fills the buffer with new data and moves the cursor to the beginning, or returns false.
-    while (bytes > 0 && !from.eof())
+    while (bytes > 0 && !from.eof()) // ITAY loop reading and writing - batch size depends on the read buffer
     {
         if (is_cancelled && *is_cancelled)
             return;
 
         /// buffer() - a piece of data available for reading; position() - the cursor of the place to which you have already read.
         size_t count = std::min(bytes, static_cast<size_t>(from.buffer().end() - from.position()));
-        to.write(from.position(), count);
+        to.write(from.position(), count); // ITAY write path
         from.position() += count;
         bytes -= count;
         written += count;

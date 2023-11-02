@@ -28,7 +28,7 @@ void copyDataImpl(IBlockInputStream & from, IBlockOutputStream & to, TCancelCall
         if (is_cancelled())
             break;
 
-        to.write(block);
+        to.write(block); // ITAY perform writing data to local disk via WriteBuffer::write
         progress(block);
     }
 

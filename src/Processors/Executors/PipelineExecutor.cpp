@@ -267,7 +267,7 @@ bool PipelineExecutor::prepareProcessor(UInt64 pid, size_t thread_number, Queue 
             // node.last_processor_status = node.processor->prepare(node.updated_input_ports, node.updated_output_ports);
             auto & processor = *node.processor;
             IProcessor::Status last_status = node.last_processor_status;
-            IProcessor::Status status = processor.prepare(node.updated_input_ports, node.updated_output_ports);
+            IProcessor::Status status = processor.prepare(node.updated_input_ports, node.updated_output_ports); // ITAY query flow - call prepare() eventually for FillingRightJoinSideTransform (:50tr)
             node.last_processor_status = status;
 
             if (need_processors_profiles)
@@ -635,12 +635,12 @@ void PipelineExecutor::finish()
     }
 }
 
-void PipelineExecutor::execute(size_t num_threads)
+void PipelineExecutor::execute(size_t num_threads) // ITAY query plan (same file)
 {
     checkTimeLimit();
     try
     {
-        executeImpl(num_threads);
+        executeImpl(num_threads); // ITAY query plan - starts the threads
 
         /// Execution can be stopped because of exception. Check and rethrow if any.
         for (auto & node : graph->nodes)
@@ -747,7 +747,7 @@ void PipelineExecutor::wakeUpExecutor(size_t thread_num)
 
 void PipelineExecutor::executeSingleThread(size_t thread_num, size_t num_threads)
 {
-    executeStepImpl(thread_num, num_threads);
+    executeStepImpl(thread_num, num_threads); // ITAY query flow
 
 #ifndef NDEBUG
     auto & context = executor_contexts[thread_num];
@@ -1016,7 +1016,7 @@ void PipelineExecutor::initializeExecution(size_t num_threads)
     }
 }
 
-void PipelineExecutor::executeImpl(size_t num_threads)
+void PipelineExecutor::executeImpl(size_t num_threads) // ITAY query flow
 {
     OpenTelemetrySpanHolder span("PipelineExecutor::executeImpl()");
 
@@ -1061,7 +1061,7 @@ void PipelineExecutor::executeImpl(size_t num_threads)
 
                 try
                 {
-                    executeSingleThread(thread_num, num_threads);
+                    executeSingleThread(thread_num, num_threads); // ITAY query flow ENDS HERE - starts single thread
                 }
                 catch (...)
                 {

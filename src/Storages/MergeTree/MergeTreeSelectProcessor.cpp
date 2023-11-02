@@ -36,7 +36,7 @@ namespace ErrorCodes
 MergeTreeSelectProcessor::MergeTreeSelectProcessor(
     const MergeTreeMetaBase & storage_,
     const StorageMetadataPtr & metadata_snapshot_,
-    const MergeTreeMetaBase::DataPartPtr & owned_data_part_,
+    const MergeTreeMetaBase::DataPartPtr & owned_data_part_, // ITAY a single part file: see Storages/MergeTree/MergeTreeDataPartCNCH.cpp
     ImmutableDeleteBitmapPtr delete_bitmap_,
     UInt64 max_block_size_rows_,
     size_t preferred_block_size_bytes_,
@@ -92,7 +92,7 @@ try
     is_first_task = false;
 
     task_columns = getReadTaskColumns(
-        storage, metadata_snapshot, data_part,
+        storage, metadata_snapshot, data_part, // ITAY can different tasks be defined on the same part on the same time?
         required_columns, prewhere_info, check_columns);
 
     auto size_predictor = (preferred_block_size_bytes == 0)
@@ -115,7 +115,7 @@ try
 
         owned_mark_cache = storage.getContext()->getMarkCache();
 
-        reader = data_part->getReader(task_columns.columns, metadata_snapshot, all_mark_ranges,
+        reader = data_part->getReader(task_columns.columns, metadata_snapshot, all_mark_ranges, // ITAY
             owned_uncompressed_cache.get(), owned_mark_cache.get(), reader_settings);
 
         if (prewhere_info)

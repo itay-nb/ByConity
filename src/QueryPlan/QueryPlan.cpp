@@ -257,14 +257,14 @@ QueryPlan QueryPlan::getSubPlan(QueryPlan::Node * node_)
     return sub_plan;
 }
 
-QueryPipelinePtr QueryPlan::buildQueryPipeline(
+QueryPipelinePtr QueryPlan::buildQueryPipeline( // ITAY query flow
     const QueryPlanOptimizationSettings & optimization_settings, const BuildQueryPipelineSettings & build_pipeline_settings)
 {
     checkInitialized();
 
     if (!optimization_settings.enable_optimizer)
     {
-        optimize(optimization_settings);
+        optimize(optimization_settings); // ITAY XXX
     }
 
     struct Frame
@@ -294,7 +294,7 @@ QueryPipelinePtr QueryPlan::buildQueryPipeline(
             bool limit_max_threads = frame.pipelines.empty();
             try
             {
-                last_pipeline = frame.node->step->updatePipeline(std::move(frame.pipelines), build_pipeline_settings);
+                last_pipeline = frame.node->step->updatePipeline(std::move(frame.pipelines), build_pipeline_settings); // ITAY dynamic filter pipeline creation flow STARTS HERE (JoinStep :10tr)
                 updatePipelineStepInfo(last_pipeline, frame.node->step, frame.node->id);
             }
             catch (const Exception & e) /// Typical for an incorrect username, password, or address.

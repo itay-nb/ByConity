@@ -225,8 +225,8 @@ void registerDiskS3(DiskFactory & factory)
             if (metadata_path == cache_path)
                 throw Exception("Metadata and cache path should be different: " + metadata_path, ErrorCodes::BAD_ARGUMENTS);
 
-            auto cache_disk = std::make_shared<DiskLocal>("s3-cache", cache_path, 0);
-            auto cache_file_predicate = [] (const String & path)
+            auto cache_disk = std::make_shared<DiskLocal>("s3-cache", cache_path, 0); // ITAY create a DiskLocal(IDisk) for caching the DiskS3(IDisk)
+            auto cache_file_predicate = [] (const String & path) // ITAY only idx|mrk|txt|dat files are cached
             {
                 return path.ends_with("idx") // index files.
                        || path.ends_with("mrk") || path.ends_with("mrk2") || path.ends_with("mrk3") // mark files.

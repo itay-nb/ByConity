@@ -86,7 +86,7 @@ MergeTreeReaderCNCH::MergeTreeReaderCNCH(
 {
     if (data_part->enableDiskCache())
     {
-        segment_cache = DiskCacheFactory::instance().get(DiskCacheType::MergeTree);
+        segment_cache = DiskCacheFactory::instance().get(DiskCacheType::MergeTree); // ITAY DiskCacheLRU
         segment_cache_strategy = segment_cache->getStrategy();
     }
 
@@ -227,7 +227,7 @@ void MergeTreeReaderCNCH::initializeStreams(const ReadBufferFromFileBase::Profil
     {
         FileStreamBuilders stream_builders;
 
-        for (const NameAndTypePair& column : columns)
+        for (const NameAndTypePair& column : columns) // ITAY handle caching of columns one-by-one
         {
             initializeStreamForColumnIfNoBurden(column, profile_callback, clock_type, &stream_builders);
         }
@@ -397,6 +397,11 @@ void MergeTreeReaderCNCH::addStreamsIfNoBurden(
         {
             // Cache segment if necessary
             IDiskCacheSegmentsVector segments
+		// ITAY - transferRangesToSegments:
+		// ITAY   - gets mark ranges
+		// ITAY   - creates and returns empty DiskCacheSegements, all the same size
+		// ITAY - getCacheSegments:
+		// ITAY   - filters the segments to only those with >2 hits
                 = segment_cache_strategy->getCacheSegments(segment_cache_strategy->transferRangesToSegments<PartFileDiskCacheSegment>(
                     all_mark_ranges,
                     source_data_part,
@@ -405,7 +410,11 @@ void MergeTreeReaderCNCH::addStreamsIfNoBurden(
                     stream_name,
                     DATA_FILE_EXTENSION,
                     PartFileDiskCacheSegment::FileOffsetAndSize{data_file_offset, data_file_size}));
-            segment_cache->cacheSegmentsToLocalDisk(segments);
+            //segment_cache->cacheSegmentsToLocalDisk(segments); // ITAY cache segments that are not already cached
+            segment_cache->cacheSegmentsToLocalDisk(segments, [=, this](const String &, const int &) { // ITAY alternative implementation which ingests into Xiphos
+			    for (const auto & segment : segments) 
+			
+			    });
         }
 
         std::function<MergeTreeReaderStreamUniquePtr()> stream_builder = [=, this]() {

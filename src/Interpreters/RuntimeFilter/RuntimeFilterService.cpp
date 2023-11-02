@@ -82,7 +82,7 @@ void RuntimeFilterService::transferRuntimeFilter(
             timer.restart();
             LOG_DEBUG(
                 log,
-                "coordinator receive all runtime filters form builder workers, query id: {}, builder id: {}, "
+                "coordinator receive all runtime filters form builder workers, query id: {}, builder id: {}, " // ITAY dynamic filter
                 "try to dispatch to execute plan segments.",
                 request->query_id(),
                 request->builder_id());
@@ -161,12 +161,12 @@ void RuntimeFilterService::dispatchRuntimeFilter(
         readBinary(t, read_buffer);
         field.bypass = BypassType(t);
 
-        DynamicData dynamic_data;
+        DynamicData dynamic_data; // ITAY dynamic filter default data is not local
         dynamic_data.bypass = field.bypass;
         dynamic_data.data = std::move(field);
         LOG_DEBUG(
             log,
-            "probe worker receive runtime filter value, query id: {}, filter id: {}, deserialize cost {} ms",
+            "probe worker receive runtime filter value, query id: {}, filter id: {}, deserialize cost {} ms", // ITAY dynamic filter
             request->query_id(),
             request->filter_id(),
             timer.elapsedMilliseconds());

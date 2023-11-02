@@ -651,7 +651,7 @@ void interpretSettings(ASTPtr ast, ContextMutablePtr context)
     }
 }
 
-static std::tuple<ASTPtr, BlockIO> executeQueryImpl(
+static std::tuple<ASTPtr, BlockIO> executeQueryImpl( // ITAY query flow
     const char * begin,
     const char * end,
     ASTPtr input_ast,
@@ -986,7 +986,7 @@ static std::tuple<ASTPtr, BlockIO> executeQueryImpl(
                     res.in = std::make_shared<OneBlockInputStream>(block);
                 }
                 else
-                    res = interpreter->execute();
+                    res = interpreter->execute(); // ITAY path0 query flow Interpreters/InterpreterSelectQueryUseOptimizer.cpp (:458tr) // ITAY path1 query flow Interpreters/InterpreterSelectQuery.cpp (:457tr)
             }
             catch (...)
             {
@@ -1807,7 +1807,7 @@ BlockIO executeQuery(
 }
 
 
-void executeQuery(
+void executeQuery( // ITAY query flow
     ReadBuffer & istr,
     WriteBuffer & ostr,
     bool allow_into_outfile,
@@ -1871,7 +1871,7 @@ void executeQuery(
     }
     else
     {
-        std::tie(ast, streams) = executeQueryImpl(begin, end, ast, context, internal, QueryProcessingStage::Complete, may_have_tail, &istr);
+        std::tie(ast, streams) = executeQueryImpl(begin, end, ast, context, internal, QueryProcessingStage::Complete, may_have_tail, &istr); // ITAY query flow
     }
 
     auto & pipeline = streams.pipeline;
@@ -1978,7 +1978,7 @@ void executeQuery(
                     set_result_details(
                         context->getClientInfo().current_query_id, out->getContentType(), format_name, DateLUT::instance().getTimeZone());
 
-                pipeline.setOutputFormat(std::move(out));
+                pipeline.setOutputFormat(std::move(out)); // ITAY query flow results will be written to out
             }
             else
             {
@@ -1986,8 +1986,8 @@ void executeQuery(
             }
 
             {
-                auto executor = pipeline.execute();
-                executor->execute(pipeline.getNumThreads());
+                auto executor = pipeline.execute();          // ITAY query flow Processors/QueryPipeline.cpp (:494tr)
+                executor->execute(pipeline.getNumThreads()); // ITAY query flow Processors/Executors/PipelineExecutor.cpp (:492tr)
             }
 
             if (outfile_target != nullptr)

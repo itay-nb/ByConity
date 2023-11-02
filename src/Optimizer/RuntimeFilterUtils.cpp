@@ -198,12 +198,12 @@ std::vector<ASTPtr> RuntimeFilterUtils::createRuntimeFilterForTableScan(
                     {
                         array.emplace_back(v);
                     }
-                    res.emplace_back(makeASTFunction("in", description.expr->clone(),
+                    res.emplace_back(makeASTFunction("in", description.expr->clone(), // ITAY dynamic filter with IN-list
                                                     std::make_shared<ASTLiteral>(std::move(array))));
 
                     if (d.values_set->has_min_max)
                     {
-                        res.emplace_back(makeASTFunction("greaterOrEquals", description.expr->clone(),
+                        res.emplace_back(makeASTFunction("greaterOrEquals", description.expr->clone(), // ITAY min/max in addition to IN-list where the list is sparse inside [min,max]
                                                         std::make_shared<ASTLiteral>(d.values_set->min)));
                         res.emplace_back(makeASTFunction("lessOrEquals", description.expr->clone(),
                                                         std::make_shared<ASTLiteral>(d.values_set->max)));

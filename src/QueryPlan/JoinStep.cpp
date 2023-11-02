@@ -220,7 +220,7 @@ QueryPipelinePtr JoinStep::updatePipeline(QueryPipelines pipelines, const BuildQ
     {
         if (!runtime_filter_builders.empty() && settings.distributed_settings.is_distributed)
         {
-            auto builder = createRuntimeFilterBuilder(settings.context);
+            auto builder = createRuntimeFilterBuilder(settings.context); // ITAY dynamic filter pipeline creation flow - create builder and consumer
             std::shared_ptr<RuntimeFilterConsumer> consumer = std::make_shared<RuntimeFilterConsumer>(
                 builder,
                 settings.context->getInitialQueryId(),
@@ -238,7 +238,7 @@ QueryPipelinePtr JoinStep::updatePipeline(QueryPipelines pipelines, const BuildQ
         max_block_size = settings.context->getSettingsRef().max_block_size;
     }
 
-    auto pipeline = QueryPipeline::joinPipelines(
+    auto pipeline = QueryPipeline::joinPipelines( // ITAY dynamic filter pipeline creation flow
         std::move(pipelines[0]),
         std::move(pipelines[1]),
         join,

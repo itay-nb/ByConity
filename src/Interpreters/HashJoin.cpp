@@ -1772,7 +1772,7 @@ void HashJoin::tryBuildRuntimeFilters(size_t total_rows) const
     if (!runtime_filter_consumer)
         return;
 
-    auto & runtime_filters = runtime_filter_consumer->getRuntimeFilters();
+    auto & runtime_filters = runtime_filter_consumer->getRuntimeFilters(); // ITAY XXX
     if (runtime_filters.empty())
         return;
 
@@ -1812,7 +1812,7 @@ void HashJoin::tryBuildRuntimeFilters(size_t total_rows) const
                 continue;
             }
 
-            buildValueSetRF(rf.second, rf.first, runtime_filter_consumer.get());
+            buildValueSetRF(rf.second, rf.first, runtime_filter_consumer.get()); // ITAY dynamic filter build IN list kind of filter (is_bf = false)
         }
 
         return ;
@@ -1829,7 +1829,7 @@ void HashJoin::tryBuildRuntimeFilters(size_t total_rows) const
 
             if (runtime_filter_consumer->isValueSet(rf.second.id))
             {
-                buildValueSetRF(rf.second, rf.first, runtime_filter_consumer.get());
+                buildValueSetRF(rf.second, rf.first, runtime_filter_consumer.get()); // ITAY dynamic filter build IN list kind of filter
                 continue;
             }
 
@@ -1838,13 +1838,13 @@ void HashJoin::tryBuildRuntimeFilters(size_t total_rows) const
                     *= runtime_filter_consumer
                            ->getGrfNdvEnlargeSize(); /// enlarge ndv in case error rate increase. TODO: shuffle-aware global runtime filter
 
-            buildBloomFilterRF(rf.second, rf.first, pre_ht_size, runtime_filter_consumer.get());
+            buildBloomFilterRF(rf.second, rf.first, pre_ht_size, runtime_filter_consumer.get()); // ITAY dynamic filter build bloom kind of filter (is_bf = true)
         }
         return;
     }
 
     // need bypass
-    bypassRuntimeFilters(BypassType::BYPASS_LARGE_HT);
+    bypassRuntimeFilters(BypassType::BYPASS_LARGE_HT); // ITAY dynamic filter hash table contain too many rows
 }
 
 void HashJoin::buildBloomFilterRF(
@@ -1943,7 +1943,7 @@ void HashJoin::bypassRuntimeFilters(BypassType type) const
 
     for (const auto & rf : runtime_filters)
     {
-        runtime_filter_consumer->bypass(rf.second.id, rf.second.distribution == RuntimeFilterDistribution::Local, type);
+        runtime_filter_consumer->bypass(rf.second.id, rf.second.distribution == RuntimeFilterDistribution::Local, type); // ITAY dynamic filter cancel probe side dynamic filters
     }
 }
 

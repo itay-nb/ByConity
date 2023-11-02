@@ -49,7 +49,7 @@ namespace ErrorCodes
 extern const int TOO_MANY_PLAN_SEGMENTS;
 }
 
-QueryPlanPtr InterpreterSelectQueryUseOptimizer::buildQueryPlan()
+QueryPlanPtr InterpreterSelectQueryUseOptimizer::buildQueryPlan() // ITAY path0 query flow
 {
     // When interpret sub query, reuse context info, e.g. PlanNodeIdAllocator, SymbolAllocator.
     if (interpret_sub_query)
@@ -99,7 +99,7 @@ QueryPlanPtr InterpreterSelectQueryUseOptimizer::buildQueryPlan()
                 log, "Optimizer stage run time: ", "Planning", std::to_string(stage_watch.elapsedMillisecondsAsDouble()) + "ms");
 
             stage_watch.restart();
-            PlanOptimizer::optimize(*query_plan, context);
+            PlanOptimizer::optimize(*query_plan, context); // ITAY path0 query flow (:3tr)
             context->logOptimizerProfile(
                 log, "Optimizer stage run time: ", "Optimizer", std::to_string(stage_watch.elapsedMillisecondsAsDouble()) + "ms");
             if (enable_plan_cache && query_hash && query_plan)
@@ -114,11 +114,11 @@ QueryPlanPtr InterpreterSelectQueryUseOptimizer::buildQueryPlan()
     return query_plan;
 }
 
-std::pair<PlanSegmentTreePtr, std::set<StorageID>> InterpreterSelectQueryUseOptimizer::getPlanSegment()
+std::pair<PlanSegmentTreePtr, std::set<StorageID>> InterpreterSelectQueryUseOptimizer::getPlanSegment() // ITAY path0 query flow
 {
     Stopwatch stage_watch, total_watch;
     total_watch.start();
-    QueryPlanPtr query_plan = buildQueryPlan();
+    QueryPlanPtr query_plan = buildQueryPlan(); // ITAY path0 query flow
 
     query_plan->setResetStepId(false);
     stage_watch.start();
@@ -317,9 +317,9 @@ QueryPipeline executeTEALimit(QueryPipeline & pipeline, ContextMutablePtr contex
     return executeQuery(postQuery.str(), context->getQueryContext(), true).pipeline;
 }
 
-BlockIO InterpreterSelectQueryUseOptimizer::execute()
+BlockIO InterpreterSelectQueryUseOptimizer::execute() // ITAY path0 query flow
 {
-    std::pair<PlanSegmentTreePtr, std::set<StorageID>> plan_segment_tree_and_used_storage_ids = getPlanSegment();
+    std::pair<PlanSegmentTreePtr, std::set<StorageID>> plan_segment_tree_and_used_storage_ids = getPlanSegment(); // ITAY path0 query flow
     auto & plan_segment_tree = plan_segment_tree_and_used_storage_ids.first;
     size_t plan_segment_num = plan_segment_tree->getPlanSegmentsMap().size();
     UInt64 max_plan_segment_num = context->getSettingsRef().max_plan_segment_num;
@@ -334,7 +334,7 @@ BlockIO InterpreterSelectQueryUseOptimizer::execute()
 
     auto coodinator = std::make_shared<MPPQueryCoordinator>(std::move(plan_segment_tree), context, MPPQueryOptions());
 
-    BlockIO res = coodinator->execute();
+    BlockIO res = coodinator->execute(); // ITAY path0 query flow (:416tr)
 
     if (auto * select_union = query_ptr->as<ASTSelectWithUnionQuery>())
     {

@@ -65,7 +65,7 @@ public:
 
         try
         {
-            nextImpl();
+            nextImpl(); // ITAY write path calls IO/WriteBufferFromFileDescriptor.cpp
         }
         catch (...)
         {
@@ -100,7 +100,7 @@ public:
 
         while (bytes_copied < n)
         {
-            nextIfAtEnd();
+            nextIfAtEnd(); // ITAY writing path here
             size_t bytes_to_copy = std::min(static_cast<size_t>(working_buffer.end() - pos), n - bytes_copied);
             memcpy(pos, from + bytes_copied, bytes_to_copy);
             pos += bytes_to_copy;

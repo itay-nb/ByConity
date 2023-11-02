@@ -92,8 +92,8 @@ private:
     const size_t max_files_to_merge = 0;
     const String temporary_files_codec = "LZ4";
     const bool allow_extended_conversion = false;
-    const size_t runtime_filter_bloom_build_threshold = 1024000;
-    const size_t runtime_filter_in_build_threshold = 1024;
+    const size_t runtime_filter_bloom_build_threshold = 1024000; // ITAY dynamic filter upper threshold (in rows, for bloom, practically raising BYPASS_LARGE_HT)
+    const size_t runtime_filter_in_build_threshold = 1024;       // ITAY dynamic filter upper threshold (in rows, for IN list)
     std::shared_ptr<RuntimeFilterConsumer> runtimeFilterConsumer = nullptr;
 
     Names key_names_left;

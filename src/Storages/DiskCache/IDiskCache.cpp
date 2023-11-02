@@ -107,14 +107,14 @@ void IDiskCache::cacheSegmentsToLocalDisk(IDiskCacheSegmentsVector hit_segments,
     // Notes: split to more tasks?
     scheduleCacheTask([this, segments = std::move(hit_segments), cb = callback] {
         String last_exception{};
-        for (const auto & hit_segment : segments)
+        for (const auto & hit_segment : segments) // ITAY PartFileDiskCacheSegment
         {
             try
             {
-                auto [disk, path] = get(hit_segment->getSegmentName());
-                if (disk == nullptr)
+                auto [disk, path] = get(hit_segment->getSegmentName()); // ITAY DiskCacheLRU
+                if (disk == nullptr) // ITAY does nothing if already cached
                 {
-                    hit_segment->cacheToDisk(*this);
+                    hit_segment->cacheToDisk(*this); // ITAY perform caching
                 }
             }
             catch (const Exception & e)

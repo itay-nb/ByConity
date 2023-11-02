@@ -461,7 +461,7 @@ bool HTTPHandler::authenticateUser(
 }
 
 
-void HTTPHandler::processQuery(
+void HTTPHandler::processQuery( // ITAY query flow STARTS HERE
     ContextMutablePtr context,
     HTTPServerRequest & request,
     HTMLForm & params,
@@ -805,7 +805,7 @@ void HTTPHandler::processQuery(
 
     query_scope.emplace(context);
 
-    executeQuery(*in, *used_output.out_maybe_delayed_and_compressed, /* allow_into_outfile = */ false, context,
+    executeQuery(*in, *used_output.out_maybe_delayed_and_compressed, /* allow_into_outfile = */ false, context, // ITAY query flow Interpreters/executeQuery.cpp (:5tr)
         [&response] (const String & current_query_id, const String & content_type, const String & format, const String & timezone)
         {
             response.setContentType(content_type);

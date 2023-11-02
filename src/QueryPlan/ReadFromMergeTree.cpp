@@ -304,7 +304,7 @@ Pipe ReadFromMergeTree::readInOrder(
     return pipe;
 }
 
-Pipe ReadFromMergeTree::read(
+Pipe ReadFromMergeTree::read( // ITAY query flow starts here
     RangesInDataParts parts_with_range, Names required_columns, ReadType read_type,
     size_t max_streams, size_t min_marks_for_concurrent_read, bool use_uncompressed_cache)
 {
