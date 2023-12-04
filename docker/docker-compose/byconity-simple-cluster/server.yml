@@ -199,3 +199,6 @@ consistent_hash_ring:
   num_probes: 21
   load_factor: 1.3
 cnch_config: "/config/cnch-config.yml"
+merge_tree:
+  enable_ingest_wide_part: true
+  enable_mixed_granularity_parts: false

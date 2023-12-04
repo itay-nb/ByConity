@@ -44,3 +44,7 @@ services:
 
 networks:
   base_net:
+
+volumes:
+  hadoop-namenode:
+  datanode:
