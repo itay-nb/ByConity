@@ -858,7 +858,7 @@ DataTypes MergeTreeDataSelectExecutor::get_set_element_types(const NamesAndTypes
     return set_element_types;
 }
 
-RangesInDataParts MergeTreeDataSelectExecutor::filterPartsByPrimaryKeyAndSkipIndexes(
+RangesInDataParts MergeTreeDataSelectExecutor::filterPartsByPrimaryKeyAndSkipIndexes( // ITAY dynamic filter
     MergeTreeMetaBase::DataPartsVector && parts,
     StorageMetadataPtr metadata_snapshot,
     const SelectQueryInfo & query_info,
@@ -953,7 +953,7 @@ RangesInDataParts MergeTreeDataSelectExecutor::filterPartsByPrimaryKeyAndSkipInd
         if (settings.read_overflow_mode_leaf == OverflowMode::THROW && settings.max_rows_to_read_leaf)
             leaf_limits = SizeLimits(settings.max_rows_to_read_leaf, 0, settings.read_overflow_mode_leaf);
 
-        auto process_part = [&](size_t part_index, bool force_ensure_one_mark)
+        auto process_part = [&](size_t part_index, bool force_ensure_one_mark) // ITAY dynamic filter - this is called from within a thread pool
         {
             auto & part = parts[part_index];
 
@@ -962,7 +962,7 @@ RangesInDataParts MergeTreeDataSelectExecutor::filterPartsByPrimaryKeyAndSkipInd
             size_t total_marks_count = part->index_granularity.getMarksCountWithoutFinal();
 
             if (metadata_snapshot->hasPrimaryKey())
-                ranges.ranges = markRangesFromPKRange(part, metadata_snapshot, key_condition, settings, log_);
+                ranges.ranges = markRangesFromPKRange(part, metadata_snapshot, key_condition, settings, log_); // ITAY dynamic filter
             else if (total_marks_count)
                 ranges.ranges = MarkRanges{MarkRange{0, total_marks_count}};
 
@@ -1700,7 +1700,7 @@ MarkRanges MergeTreeDataSelectExecutor::markRangesFromPKRange(
         /// we can use binary search algorithm to find the left and right endpoint key marks of such interval.
         /// The returned value is the minimum range of marks, containing all keys for which KeyCondition holds
 
-        LOG_TRACE(log, "Running binary search on index range for part {} ({} marks)", part->name, marks_count);
+        LOG_TRACE(log, "Running binary search on index range for part {} ({} marks)", part->name, marks_count); // ITAY log print
 
         size_t steps = 0;
 
@@ -1720,7 +1720,7 @@ MarkRanges MergeTreeDataSelectExecutor::markRangesFromPKRange(
             ++steps;
         }
         result_range.begin = searched_left;
-        LOG_TRACE(log, "Found (LEFT) boundary mark: {}", searched_left);
+        LOG_TRACE(log, "Found (LEFT) boundary mark: {}", searched_left); // ITAY log print
 
         searched_right = marks_count;
         while (searched_left + 1 < searched_right)

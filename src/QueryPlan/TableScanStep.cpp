@@ -1256,7 +1256,7 @@ void TableScanStep::initializePipeline(QueryPipeline & pipeline, const BuildQuer
 
 
         if (auto * source = dynamic_cast<ISourceStep *>(step.get()))
-            source->initializePipeline(pipeline, build_context);
+            source->initializePipeline(pipeline, build_context); // ITAY dynamic filter :3tn
 
         aliasColumns(pipeline, build_context, "normal read");
         setQuotaAndLimits(pipeline, options, build_context);

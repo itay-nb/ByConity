@@ -944,7 +944,7 @@ MergeTreeDataSelectAnalysisResultPtr ReadFromMergeTree::selectRangesToRead(Merge
         log);
 }
 
-MergeTreeDataSelectAnalysisResultPtr ReadFromMergeTree::selectRangesToRead(
+MergeTreeDataSelectAnalysisResultPtr ReadFromMergeTree::selectRangesToRead( // ITAY dynamic filter
     MergeTreeData::DataPartsVector parts,
     const StorageMetadataPtr & metadata_snapshot_base,
     const StorageMetadataPtr & metadata_snapshot,
@@ -990,7 +990,7 @@ MergeTreeDataSelectAnalysisResultPtr ReadFromMergeTree::selectRangesToRead(
                 "Primary key ({}) is not used and setting 'force_primary_key' is set",
                 fmt::join(primary_key_columns, ", ")))});
     }
-    LOG_DEBUG(log, "Key condition: {}", key_condition.toString());
+    LOG_DEBUG(log, "Key condition: {}", key_condition.toString()); // ITAY log print
 
     const auto & select = query_info.query->as<ASTSelectQuery &>();
 
@@ -1096,7 +1096,7 @@ MergeTreeDataSelectAnalysisResultPtr ReadFromMergeTree::selectRangesToRead(
 
         Stopwatch stopwatch;
 
-        result.parts_with_ranges = MergeTreeDataSelectExecutor::filterPartsByPrimaryKeyAndSkipIndexes(
+        result.parts_with_ranges = MergeTreeDataSelectExecutor::filterPartsByPrimaryKeyAndSkipIndexes( // ITAY dynamic filter
             std::move(parts),
             metadata_snapshot,
             query_info,
@@ -1112,7 +1112,7 @@ MergeTreeDataSelectAnalysisResultPtr ReadFromMergeTree::selectRangesToRead(
             result.sampling.relative_sample_size);
 
         auto cost_micro_seconds = stopwatch.elapsedMicroseconds();
-        LOG_DEBUG(log, "Filtering parts by primiry key and skip indexes used: {} micro seconds", cost_micro_seconds);
+        LOG_DEBUG(log, "Filtering parts by primiry key and skip indexes used: {} micro seconds", cost_micro_seconds); // ITAY log print
     }
     catch (...)
     {
@@ -1165,18 +1165,18 @@ MergeTreeDataSelectAnalysisResultPtr ReadFromMergeTree::selectRangesToRead(
     return std::make_shared<MergeTreeDataSelectAnalysisResult>(MergeTreeDataSelectAnalysisResult{.result = std::move(result)});
 }
 
-ReadFromMergeTree::AnalysisResult ReadFromMergeTree::getAnalysisResult() const
+ReadFromMergeTree::AnalysisResult ReadFromMergeTree::getAnalysisResult() const // ITAY dynamic filter
 {
-    auto result_ptr = analyzed_result_ptr ? analyzed_result_ptr : selectRangesToRead(prepared_parts);
+    auto result_ptr = analyzed_result_ptr ? analyzed_result_ptr : selectRangesToRead(prepared_parts); // ITAY dynamic filter
     if (std::holds_alternative<std::exception_ptr>(result_ptr->result))
         std::rethrow_exception(std::get<std::exception_ptr>(result_ptr->result));
 
     return std::get<ReadFromMergeTree::AnalysisResult>(result_ptr->result);
 }
 
-void ReadFromMergeTree::initializePipeline(QueryPipeline & pipeline, const BuildQueryPipelineSettings &)
+void ReadFromMergeTree::initializePipeline(QueryPipeline & pipeline, const BuildQueryPipelineSettings &) // ITAY dynamic filter
 {
-    auto result = getAnalysisResult();
+    auto result = getAnalysisResult(); // ITAY dynamic filter
     LOG_DEBUG(
         log,
         "Selected {}/{} parts by partition key, {} parts by primary key, {}/{} marks by primary key, {} marks to read from {} ranges",
